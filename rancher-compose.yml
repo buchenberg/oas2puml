@@ -1,0 +1,18 @@
+version: '2'
+services:
+  har2puml:
+    image: panamax.spectrumxg.com/qis-tools/har2puml:${CI_COMMIT_SHA}
+    expose:
+      - 80
+    labels:
+      sxg.service.type: web
+      sxg.service.port: 80
+      io.rancher.scheduler.affinity:host_label: sxg.host.type=app
+    health_check:
+      port: 80
+      request_line: GET / HTTP/1.0
+      interval: 10000
+      healthy_threshold: 2
+      strategy: recreate
+      unhealthy_threshold: 3
+      response_timeout: 10000

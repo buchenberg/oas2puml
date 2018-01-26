@@ -1,0 +1,47 @@
+
+stages:
+  - build
+  - package
+  - deploy
+
+build:react:
+  stage: build
+  image: node:8
+  tags:
+    - docker
+  script:
+    - npm install
+    - npm run build
+    - rm -rf public
+    - mv build public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+
+build:nginx:
+  stage: package
+  image: panamax.spectrumxg.com/qis/standard-docker-builders:0.12.5-ranchercompose
+  tags:
+    - docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN panamax.spectrumxg.com
+    - docker build -t panamax.spectrumxg.com/qis-tools/har2puml:${CI_COMMIT_SHA} .
+    - docker push panamax.spectrumxg.com/qis-tools/har2puml:${CI_COMMIT_SHA}
+  only:
+    - master
+
+deploy_to_rancher:
+  stage: deploy
+  image: panamax.spectrumxg.com/qis/standard-docker-builders:0.12.5-ranchercompose
+  tags:
+    - docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN panamax.spectrumxg.com
+    - export RANCHER_URL=${ODINSSON_RANCHER_URL}
+    - export RANCHER_ACCESS_KEY=${ODINSSON_RANCHER_ACCESS_KEY}
+    - export RANCHER_SECRET_KEY=${ODINSSON_RANCHER_SECRET_KEY}
+    - rancher-compose -f ./rancher-compose.yml up -d --upgrade --confirm-upgrade
+  only:
+    - master

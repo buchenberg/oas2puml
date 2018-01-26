@@ -1,0 +1,8 @@
+version: '3'
+services:
+  har2puml:
+    container_name: har2puml
+    build:
+      context: .
+    ports:
+      - "8001:80"

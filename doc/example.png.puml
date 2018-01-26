@@ -1,0 +1,5 @@
+@startuml
+"User Agent" -> "TWCTV API": getTwctv(tmsGuideIds, viewParentallyBlocked, shows) 
+note right: /ipvs/api/smarttv/guide/v1/twctv
+"TWCTV API" -> "User Agent": 200( twctv ) 
+@enduml
