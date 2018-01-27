@@ -12,7 +12,7 @@ class OasConfigurator extends React.Component {
         super(props);
         this.state = {
             oas: props.oas,
-            selected: [],
+            selected: {},
         };
     };
 
@@ -38,33 +38,29 @@ class OasConfigurator extends React.Component {
         localStorage.setItem('paths_selected', JSON.stringify(selections));
     };
 
-  
 
-    handleCheck = index => event => {
+
+    handleCheck = (path, method) => event => {
+        let selected = this.state.selected;
         if (event.target.checked) {
+            if (selected[path]) {
+                selected[path].push(method)
+            } else {
+                selected[path] = [method];
+            }
             this.setState(prevState => ({
-                selected: [...prevState.selected, index]
+                selected
             }), () => {
                 this.cacheSelections(this.state.selected);
             });
         } else {
-            let value = index;
+            selected[path] = selected[path].filter(item => item !== method)
             this.setState(prevState => ({
-                selected: [...prevState.selected.filter(item => item !== value)]
+                selected
             }), () => {
                 this.cacheSelections(this.state.selected);
             });
         }
-    };
-
-    hostFromUrl = urlString => {
-        const url = new URL(urlString);
-        return url.hostname;
-    };
-
-    pathFromUrl = urlString => {
-        const url = new URL(urlString);
-        return url.pathname;
     };
 
     resourceFromPath = pathString => {
@@ -116,29 +112,35 @@ class OasConfigurator extends React.Component {
             },
         };
 
-        const paths = Object.entries(oas.paths);
+        const paths = Object.keys(oas.paths);
 
         const entries = <div style={styles.listRoot}>
             <List style={styles.list}>
-                {paths.map(
-                    (path, index) => (
-                        <div key={`entry-div-${index}`}>
+                {Object.keys(oas.paths).map(
+                    (path, pathIndex) => (
+                        <div key={`path-div-${pathIndex}`}>
                             <ListItem
-                                key={`entry-${index}`}
-                                dense
-                            >
-                                <Checkbox
-                                    onChange={this.handleCheck(index)}
-                                    key={`entry-${index}`}
-                                    value={`${index}`}
-                                    checked={this.state.selected.includes(index)? true: false}
-                                />
-                                <ListItemText
-                                    primary={`${path[0]}`}
-                                     />
+                                key={`path-${pathIndex}`}
+                                dense>
+                                <ListItemText primary={path} />
                             </ListItem>
+                            <List disablePadding>
+                                {Object.keys(oas.paths[path]).map(
+                                    (method, methodIndex) => (
+                                        <ListItem className={theme.nested} dense>
+                                            <Checkbox
+                                                inset
+                                                onChange={this.handleCheck(path, method)}
+                                                key={`${pathIndex}:${methodIndex}`}
+                                                value={`${pathIndex}:${methodIndex}`}
+                                                checked={this.state.selected[path] && this.state.selected[path].includes(method) ? true : false}
+                                            />
+                                            <ListItemText inset primary={method} />
+                                        </ListItem>
+                                    ))}
+                            </List>
 
-                            {(index + 1) < paths.length &&
+                            {(pathIndex + 1) < Object.keys(oas.paths).length &&
                                 <Divider />
                             }
                         </div>
@@ -147,20 +149,20 @@ class OasConfigurator extends React.Component {
         </div>;
 
         return (
-                <Card style={styles.card}>
-                    <CardHeader
-                        style={styles.cardHeader}
-                        title="OAS Configurator"
-                        subheader="Select oas paths to be used for the sequence diagram." />
-                    <CardContent style={styles.cardContent}>
-                        {entries}
-                    </CardContent>
-                    <CardActions style={styles.cardActions}>
-                        <Button raised dense color="accent" onClick={this.props.handler}>
-                            Transform
+            <Card style={styles.card}>
+                <CardHeader
+                    style={styles.cardHeader}
+                    title="OAS Configurator"
+                    subheader="Select oas paths to be used for the sequence diagram." />
+                <CardContent style={styles.cardContent}>
+                    {entries}
+                </CardContent>
+                <CardActions style={styles.cardActions}>
+                    <Button raised dense color="accent" onClick={this.props.handler}>
+                        Transform
                         </Button>
-                    </CardActions>
-                </Card>
+                </CardActions>
+            </Card>
         );
     }
 }

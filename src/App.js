@@ -100,21 +100,40 @@ class App extends React.Component {
     const suspect2 = pathSegments[pathLength - 2]; // second to last path segment
     const regex = /v\d/g; // looking for 'v' plus a single digit e.g. 'v1'
     if (regex.test(suspect1)) {
-        return suspect2.toLowerCase().replace(/(^| )(\w)/g, s => s.toUpperCase());
+      return suspect2.toLowerCase().replace(/(^| )(\w)/g, s => s.toUpperCase());
     }
     return suspect1.toLowerCase().replace(/(^| )(\w)/g, s => s.toUpperCase());
-};
+  };
 
   pumlfy = (oas, callback) => {
-    const selected = JSON.parse(localStorage.getItem('paths_selected')).sort();
+    const selected = JSON.parse(localStorage.getItem('paths_selected'));
     const paths = Object.entries(oas.paths);
     let pumlText = '@startuml\n';
-    for (let index in selected) {
-      const path = selected[index]
-      const pathKey = paths[path][0];
-      console.log('path', JSON.stringify(pathKey))//require('url').parse(paths[path]);
+    for (let path in selected) {
       const serviceName = oas.info.title;
-      const resourceName = this.resourceFromPath(pathKey);
+      const resourceName = this.resourceFromPath(path);
+      const methods = selected[path]
+      for (let index in methods) {
+        const method = methods[index]
+        pumlText +=
+          '"User Agent" -> ' + //request
+          '"' + serviceName + '"' +
+          ': ' + method + resourceName.charAt(0).toUpperCase() + resourceName.slice(1) +
+          '(' +
+          // queryParams.replace(/,\s*$/, '') +
+          ') \n' +
+          'note right: ' + //note
+          method + ' ' + path +
+          '\n' + //response
+          '"' + serviceName + '"' + //service
+          ' -> "User Agent": ' + //client
+          'resStatus' + //method (status?)
+          '( ' +
+          resourceName + 'resStatusText' + //params (payload)
+          ' ) \n';
+
+      }
+
       // const method = log.entries[path].request.method.toLowerCase();
       // const resStatus = log.entries[path].response.status;
 
@@ -134,22 +153,7 @@ class App extends React.Component {
       //   queryParams += log.entries[path].request.queryString[qParam].name + ', ';
       // }
 
-      pumlText +=
-        '"User Agent" -> ' + //request
-        '"' + serviceName + '"' +
-        ': ' + 'method' + resourceName.charAt(0).toUpperCase() + resourceName.slice(1) +
-        '(' +
-        // queryParams.replace(/,\s*$/, '') +
-        ') \n' +
-        'note right: ' + //note
-        // log.entries[path].request.method + ' ' + requestUrlObj.pathname +
-        '\n' + //response
-        '"' + serviceName + '"' + //service
-        ' -> "User Agent": ' + //client
-        'resStatus' + //method (status?)
-        '( ' +
-        resourceName + 'resStatusText' + //params (payload)
-        ' ) \n';
+
 
     }
     pumlText += '@enduml';
