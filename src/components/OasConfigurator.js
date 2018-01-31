@@ -112,7 +112,7 @@ class OasConfigurator extends React.Component {
             },
         };
 
-        const paths = Object.keys(oas.paths);
+        const methods = ['get', 'put', 'post', 'delete']
 
         const entries = <div style={styles.listRoot}>
             <List style={styles.list}>
@@ -127,16 +127,19 @@ class OasConfigurator extends React.Component {
                             <List disablePadding>
                                 {Object.keys(oas.paths[path]).map(
                                     (method, methodIndex) => (
-                                        <ListItem className={theme.nested} dense>
-                                            <Checkbox
-                                                inset
-                                                onChange={this.handleCheck(path, method)}
-                                                key={`${pathIndex}:${methodIndex}`}
-                                                value={`${pathIndex}:${methodIndex}`}
-                                                checked={this.state.selected[path] && this.state.selected[path].includes(method) ? true : false}
-                                            />
-                                            <ListItemText inset primary={method} />
-                                        </ListItem>
+                                        <div key={`div:${pathIndex}:${methodIndex}`}>
+                                            {methods.includes(method) &&
+                                                <ListItem className={theme.nested} key={`li:${pathIndex}:${methodIndex}`} dense>
+                                                    <Checkbox
+                                                        onChange={this.handleCheck(path, method)}
+                                                        key={`cb:${pathIndex}:${methodIndex}`}
+                                                        value={`${pathIndex}:${methodIndex}`}
+                                                        checked={this.state.selected[path] && this.state.selected[path].includes(method) ? true : false}
+                                                    />
+                                                    <ListItemText inset primary={method} />
+                                                </ListItem>
+                                            }
+                                        </div>
                                     ))}
                             </List>
 
@@ -153,7 +156,7 @@ class OasConfigurator extends React.Component {
                 <CardHeader
                     style={styles.cardHeader}
                     title="OAS Configurator"
-                    subheader="Select oas paths to be used for the sequence diagram." />
+                    subheader="Select oas transactions to be used for the sequence diagram." />
                 <CardContent style={styles.cardContent}>
                     {entries}
                 </CardContent>

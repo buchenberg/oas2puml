@@ -98,8 +98,9 @@ class App extends React.Component {
     const pathLength = pathSegments.length;
     const suspect1 = pathSegments[pathLength - 1]; // last path segment
     const suspect2 = pathSegments[pathLength - 2]; // second to last path segment
-    const regex = /v\d/g; // looking for 'v' plus a single digit e.g. 'v1'
-    if (regex.test(suspect1)) {
+    const regexVersion = /v\d/g; // looking for 'v' plus a single digit e.g. 'v1'
+    const regexParam = /{.*/g; // looking for '{' to denote a path param
+    if (regexVersion.test(suspect1) || regexParam.test(suspect1)) {
       return suspect2.toLowerCase().replace(/(^| )(\w)/g, s => s.toUpperCase());
     }
     return suspect1.toLowerCase().replace(/(^| )(\w)/g, s => s.toUpperCase());
@@ -107,7 +108,6 @@ class App extends React.Component {
 
   pumlfy = (oas, callback) => {
     const selected = JSON.parse(localStorage.getItem('paths_selected'));
-    const paths = Object.entries(oas.paths);
     let pumlText = '@startuml\n';
     for (let path in selected) {
       const serviceName = oas.info.title;
@@ -115,6 +115,7 @@ class App extends React.Component {
       const methods = selected[path]
       for (let index in methods) {
         const method = methods[index]
+        
         pumlText +=
           '"User Agent" -> ' + //request
           '"' + serviceName + '"' +
@@ -124,13 +125,20 @@ class App extends React.Component {
           ') \n' +
           'note right: ' + //note
           method + ' ' + path +
-          '\n' + //response
-          '"' + serviceName + '"' + //service
-          ' -> "User Agent": ' + //client
-          'resStatus' + //method (status?)
-          '( ' +
-          resourceName + 'resStatusText' + //params (payload)
-          ' ) \n';
+          '\n';
+
+          const responses = oas.paths[path][method].responses;
+        for (let key in responses) {
+          const respCode = Object.keys(responses[key])[0]
+          pumlText +=
+            '"' + serviceName + '"' + //service
+            + //client
+            key + //method (status?)
+            '( ' +
+            resourceName + //params (payload)
+            ' ) \n';
+
+        }
 
       }
 
