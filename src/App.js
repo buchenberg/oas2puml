@@ -113,26 +113,37 @@ class App extends React.Component {
       const serviceName = oas.info.title;
       const resourceName = this.resourceFromPath(path);
       const methods = selected[path]
+      const commonParams = oas.paths[path].parameters || null;
       for (let index in methods) {
         const method = methods[index]
-        
+
         pumlText +=
           '"User Agent" -> ' + //request
           '"' + serviceName + '"' +
           ': ' + method + resourceName.charAt(0).toUpperCase() + resourceName.slice(1) +
-          '(' +
-          // queryParams.replace(/,\s*$/, '') +
-          ') \n' +
+          '( ';
+
+        // common path params
+        for (let index in commonParams) {
+          let paramObj = commonParams[index];
+          if (paramObj.$ref) {
+            let ref = paramObj.$ref;
+            var parts = ref.split('/');
+            var lastSegment = parts.pop() || parts.pop();
+            pumlText += lastSegment + ' ';
+          }
+
+        }
+        pumlText += ' ) \n' +
           'note right: ' + //note
           method + ' ' + path +
           '\n';
 
-          const responses = oas.paths[path][method].responses;
+        const responses = oas.paths[path][method].responses;
         for (let key in responses) {
-          const respCode = Object.keys(responses[key])[0]
           pumlText +=
             '"' + serviceName + '"' + //service
-            + //client
+            ' -> "User Agent":' + //client
             key + //method (status?)
             '( ' +
             resourceName + //params (payload)
@@ -141,27 +152,6 @@ class App extends React.Component {
         }
 
       }
-
-      // const method = log.entries[path].request.method.toLowerCase();
-      // const resStatus = log.entries[path].response.status;
-
-      // let resStatusText;
-      // switch (log.entries[path].response.status) {
-      //   case 200:
-      //     resStatusText = '';
-      //     break;
-      //   default:
-      //     resStatusText = ' ' + log.entries[path].response.statusText;
-      //     break;
-      // }
-
-      // Query params
-      // let queryParams = '';
-      // for (var qParam in log.entries[path].request.queryString) {
-      //   queryParams += log.entries[path].request.queryString[qParam].name + ', ';
-      // }
-
-
 
     }
     pumlText += '@enduml';
