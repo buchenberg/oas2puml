@@ -27,8 +27,8 @@ build:nginx:
     - docker
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN panamax.spectrumxg.com
-    - docker build -t panamax.spectrumxg.com/qis-tools/har2puml:${CI_COMMIT_SHA} .
-    - docker push panamax.spectrumxg.com/qis-tools/har2puml:${CI_COMMIT_SHA}
+    - docker build -t panamax.spectrumxg.com/qis-tools/oas2puml:${CI_COMMIT_SHA} .
+    - docker push panamax.spectrumxg.com/qis-tools/oas2puml:${CI_COMMIT_SHA}
   only:
     - master
 

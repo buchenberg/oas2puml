@@ -1,7 +1,7 @@
 version: '3'
 services:
-  har2puml:
-    container_name: har2puml
+  oas2puml:
+    container_name: oas2puml
     build:
       context: .
     ports:

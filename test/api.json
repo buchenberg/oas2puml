@@ -1,0 +1,700 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "Remote Digital Video Recorder API v3",
+      "version": "v3",
+      "title": "rDVR API"
+    },
+    "host": "stva.figaro.spectrumtoolbox.com",
+    "basePath": "/ipvs/api/rdvr/v3",
+    "consumes": [
+      "application/json; charset=utf-8"
+    ],
+    "tags": [
+      {
+        "name": "rDVR",
+        "description": "rDVR General Information API"
+      },
+      {
+        "name": "Playback",
+        "description": "Playback API"
+      },
+      {
+        "name": "Programs",
+        "description": "Program Recordings API"
+      },
+      {
+        "name": "Series",
+        "description": "Series Recordings API"
+      }
+    ],
+    "paths": {
+      "/{macAddress}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "put": {
+          "tags": [
+            "rDVR"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/DvrDetails"
+                  }
+                ]
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Update was sent to STB."
+            }
+          }
+        }
+      },
+      "/{macAddress}/playback": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "post": {
+          "description": "Send recording to DVR for playback",
+          "tags": [
+            "Playback"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Update was sent to STB."
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Programs"
+          ],
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "List of program recordings.",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Recordings"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Programs"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "x-mock": true,
+              "description": "Created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Programs"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Update was sent to STB."
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Programs"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Delete command was sent to STB."
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings/scheduled": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Programs"
+          ],
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "List of program recordings.",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ScheduledRecordings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings/{tmsProgramId}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/tmsProgramId"
+          },
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Programs"
+          ],
+          "description": "Returns a single recording.",
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "Single recording.",
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings/series": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Series"
+          ],
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "List of series recordings.",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/SeriesRecordingSummary"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Series"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/SeriesRecordingSummary"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "x-mock": true,
+              "description": "Created"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Series"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/SeriesRecordingSummary"
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Update was sent to STB."
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Series"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/SeriesRecordingSummary"
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Delete command was sent to STB."
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings/series/scheduled": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Series"
+          ],
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "List of program recordings.",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ScheduledSeriesRecordings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings/series/{tmsSeriesId}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/tmsSeriesId"
+          },
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Series"
+          ],
+          "description": "Returns a specified series.",
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "An existing series.",
+              "schema": {
+                "$ref": "#/definitions/SeriesRecordingDetail"
+              }
+            }
+          }
+        }
+      },
+      "/{macAddress}/recordings/series/priorities": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/macAddress"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Series"
+          ],
+          "responses": {
+            "200": {
+              "x-mock": true,
+              "description": "List of series priorities.",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/SeriesPriorities"
+                }
+              }
+            }
+          },
+          "parameters": [
+            {
+              "$ref": "#/parameters/macAddress"
+            }
+          ]
+        },
+        "put": {
+          "tags": [
+            "Series"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/SeriesPriorities"
+                  }
+                ]
+              }
+            }
+          ],
+          "responses": {
+            "202": {
+              "x-mock": true,
+              "description": "\"Accepted\" Update was sent to STB."
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "Recordings": {
+        "description": "An array of existing recordings",
+        "required": [
+          "items"
+        ],
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Recording"
+        }
+      },
+      "SeriesRecordings": {
+        "description": "An array of metadata about existing recordings",
+        "required": [
+          "items"
+        ],
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SeriesRecordingSummary"
+        }
+      },
+      "SeriesRecordingSummary": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/SeriesIdentifier"
+          },
+          {
+            "$ref": "#/definitions/CommonMetaData"
+          },
+          {
+            "$ref": "#/definitions/DisplayMetaData"
+          }
+        ]
+      },
+      "SeriesRecordingDetail": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/SeriesIdentifier"
+          },
+          {
+            "$ref": "#/definitions/CommonMetaData"
+          },
+          {
+            "$ref": "#/definitions/DisplayMetaData"
+          },
+          {
+            "properties": {
+              "recordings": {
+                "$ref": "#/definitions/Recordings"
+              }
+            }
+          }
+        ]
+      },
+      "Recording": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/ProgramIdentifier"
+          },
+          {
+            "$ref": "#/definitions/CommonMetaData"
+          },
+          {
+            "$ref": "#/definitions/ProgramMetaData"
+          },
+          {
+            "$ref": "#/definitions/DisplayMetaData"
+          }
+        ]
+      },
+      "SeriesIdentifier": {
+        "type": "object",
+        "required": [
+          "tmsSeriesId"
+        ],
+        "properties": {
+          "tmsSeriesId": {
+            "type": "number",
+            "example": 1234
+          }
+        }
+      },
+      "ProgramIdentifier": {
+        "type": "object",
+        "required": [
+          "tmsProgramId"
+        ],
+        "properties": {
+          "tmsProgramId": {
+            "type": "string",
+            "example": "SH023544720000"
+          }
+        }
+      },
+      "ProgramMetaData": {
+        "type": "object",
+        "required": [
+          "startTimeUtc",
+          "stopTimeUtc"
+        ],
+        "properties": {
+          "tmsSeriesId": {
+            "type": "number",
+            "example": 1234
+          },
+          "startTimeUtc": {
+            "type": "number",
+            "example": 1512504000
+          },
+          "stopTimeUtc": {
+            "type": "number",
+            "example": 1512507600
+          }
+        }
+      },
+      "DisplayMetaData": {
+        "type": "object",
+        "required": [
+          "imgUrl"
+        ],
+        "properties": {
+          "imgUrl": {
+            "type": "string",
+            "example": "/imageserver/program/EP010783390152"
+          }
+        }
+      },
+      "CommonMetaData": {
+        "type": "object",
+        "required": [
+          "tmsGuideServiceId",
+          "channelNumber"
+        ],
+        "properties": {
+          "tmsGuideServiceId": {
+            "type": "number",
+            "example": 32645
+          },
+          "channelNumber": {
+            "type": "number",
+            "example": 24
+          }
+        }
+      },
+      "ScheduledRecordings": {
+        "description": "A list of scheduled recordings",
+        "type": "array",
+        "required": [
+          "items"
+        ],
+        "items": {
+          "$ref": "#/definitions/ScheduledRecording"
+        }
+      },
+      "ScheduledSeriesRecordings": {
+        "description": "A list of scheduled recordings",
+        "type": "array",
+        "required": [
+          "items"
+        ],
+        "items": {
+          "$ref": "#/definitions/ScheduledSeries"
+        }
+      },
+      "ScheduledSeries": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/SeriesRecordingSummary"
+          },
+          {
+            "properties": {
+              "options": {
+                "$ref": "#/definitions/ScheduledRecordingOptions"
+              }
+            }
+          }
+        ]
+      },
+      "ScheduledRecording": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/Recording"
+          },
+          {
+            "properties": {
+              "options": {
+                "$ref": "#/definitions/ScheduledRecordingOptions"
+              }
+            }
+          }
+        ]
+      },
+      "ScheduledRecordingOptions": {
+        "type": "object",
+        "properties": {
+          "deleteWhenSpaceIsNeeded": {
+            "type": "boolean",
+            "example": false
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "MIN",
+              "MAX"
+            ],
+            "example": "MAX"
+          },
+          "recordOnlyAtThisAirTime": {
+            "type": "boolean",
+            "example": false
+          },
+          "numEpisodesToKeep": {
+            "type": "number",
+            "example": 1
+          },
+          "recordOnlyNewEpisodes": {
+            "type": "boolean",
+            "example": false
+          },
+          "startAdjustMinutes": {
+            "type": "number",
+            "example": 0
+          },
+          "stopAdjustMinutes": {
+            "type": "number",
+            "example": 0
+          }
+        }
+      },
+      "SeriesPriorities": {
+        "type": "object",
+        "properties": {
+          "priorityList": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float",
+              "example": 12345.0
+            }
+          }
+        }
+      },
+      "DvrDetails": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "macAddress": {
+        "name": "macAddress",
+        "description": "The remote DVR MAC address.",
+        "in": "path",
+        "required": true,
+        "type": "string",
+        "x-example": "0000061AAA7A"
+      },
+      "tmsSeriesId": {
+        "name": "tmsSeriesId",
+        "in": "path",
+        "required": true,
+        "type": "number",
+        "x-example": 1234
+      },
+      "tmsProgramId": {
+        "name": "tmsProgramId",
+        "in": "path",
+        "required": true,
+        "type": "string",
+        "x-example": "SH023544720000"
+      }
+    }
+  }

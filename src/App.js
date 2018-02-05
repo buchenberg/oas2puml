@@ -11,7 +11,6 @@ import Snackbar from 'material-ui/Snackbar';
 import Fade from 'material-ui/transitions/Fade';
 
 import OasExplorer from './components/OasExplorer';
-import OasConfigurator from './components/OasConfigurator';
 import PumlText from './components/PumlText';
 import plantumlEncoder from 'plantuml-encoder';
 import PumlImage from './components/PumlImage';
@@ -83,11 +82,11 @@ class App extends React.Component {
   }
 
   loadOasCache = () => {
-    const harString = localStorage.getItem('oas_content');
-    if (harString) {
+    const oasString = localStorage.getItem('oas');
+    if (oasString) {
       let hasOas = true;
-      let oas = JSON.parse(harString);
-      let title = localStorage.getItem('har_title');
+      let oas = JSON.parse(oasString);
+      let title = localStorage.getItem('title');
       this.setState({
         oas,
         hasOas,
@@ -129,34 +128,28 @@ class App extends React.Component {
     return paramArray;
   }
 
-  pumlfy = (oas, callback) => {
-    //const selected = JSON.parse(localStorage.getItem('paths_selected'));
-    let pumlText = '@startuml\n';
-    for (let index in oas.paths) {
-      const serviceName = oas.info.title;
-      const resourceName = this.resourceFromPath(index);
-      const methods = oas.paths[index]
-      // const commonParams = oas.paths[path].parameters || null;
-      verbs.map( verb => {
-        if (methods[verb]) {
-          const method = methods[verb]
-          let allParams = [];
-
-        pumlText +=
+  parseMethods = (pathKey, serviceName, resourceName, pathObj) => {
+    let pumlText = "";
+    verbs.map(verb => {
+      let puml = "";
+      if (pathObj[verb]) {
+        const methodObj = pathObj[verb]
+        let allParams = [];
+        puml +=
           '"User Agent" -> ' + //request
           '"' + serviceName + '"' +
           ': ' + verb + resourceName.charAt(0).toUpperCase() + resourceName.slice(1) +
           '( ';
 
-        if (methods.parameters) {
-          let paramArray = this.parseParams(methods.parameters);
+        if (pathObj.parameters) {
+          let paramArray = this.parseParams(pathObj.parameters);
           for (let param in paramArray) {
             allParams.push(paramArray[param])
           }
         }
 
-        if (method.parameters) {
-          let paramArray = this.parseParams(method.parameters);
+        if (methodObj.parameters) {
+          let paramArray = this.parseParams(methodObj.parameters);
           for (let param in paramArray) {
             allParams.push(paramArray[param])
           }
@@ -164,33 +157,41 @@ class App extends React.Component {
 
         for (let index in allParams) {
           if (allParams[allParams.length - 1] === allParams[index]) { //last one
-            pumlText += allParams[index];
+            puml += allParams[index];
           } else {
-            pumlText += allParams[index] + ', ';
+            puml += allParams[index] + ', ';
           }
         }
 
-        pumlText += ' ) \n' +
+        puml += ' ) \n' +
           'note right: ' + //note
-          verb + ' ' + index +
+          verb.toUpperCase() + ' ' + pathKey +
           '\n';
 
-        const responses = method.responses;
+        const responses = methodObj.responses;
         for (let key in responses) {
-          pumlText +=
+          puml +=
             '"' + serviceName + '"' + //service
             ' -> "User Agent":' + //client
             key + //method (status?)
             '( ' +
             resourceName + //params (payload)
             ' ) \n';
-
         }
 
-        }
-        
-      })
+      }
+      return pumlText += puml;
+    })
+    return pumlText;
+  }
 
+  pumlfy = (oas, callback) => {
+    const serviceName = oas.info.title;
+    let pumlText = '@startuml\n';
+    for (let pathKey in oas.paths) {
+      const resourceName = this.resourceFromPath(pathKey);
+      const pathObj = oas.paths[pathKey]
+      pumlText += this.parseMethods(pathKey, serviceName, resourceName, pathObj)
     }
     pumlText += '@enduml';
     callback(pumlText);
@@ -208,9 +209,8 @@ class App extends React.Component {
     localStorage.setItem('encoded', encoded);
   };
 
-  transformHandler = () => {
-    //e.preventDefault()
-    this.pumlfy(this.state.oas,
+  transformOas = oas => {
+    this.pumlfy(oas,
       (puml) => {
         let encoded = plantumlEncoder.encode(puml);
         this.cacheEncoded(encoded);
@@ -223,24 +223,25 @@ class App extends React.Component {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = (event) => {
+      let oas;
       try {
-        JSON.parse(reader.result);
+        oas = JSON.parse(reader.result);
       } catch (error) {
         return alert('Not valid JSON!', error)
       }
-      localStorage.setItem('oas_content', reader.result);
-      localStorage.setItem('har_title', file.name);
+      localStorage.setItem('oas', reader.result);
+      localStorage.setItem('title', file.name);
       localStorage.removeItem('encoded');
-      localStorage.removeItem('paths_selected');
+      //localStorage.removeItem('paths_selected');
       localStorage.removeItem('puml');
-      return this.setState({
-        sbOpen: true,
-        oas: JSON.parse(reader.result),
-        title: file.name,
-        hasOas: true,
-        encoded: null,
-        puml: null,
-      });
+      this.pumlfy(oas,
+        (puml) => {
+          let hasOas = true;
+          let encoded = plantumlEncoder.encode(puml);
+          this.cacheEncoded(encoded);
+          this.cachePuml(puml);
+          this.setState({ hasOas, puml, encoded });
+        });
     };
     reader.readAsText(file);
   };
@@ -281,9 +282,6 @@ class App extends React.Component {
           <Grid container spacing={24} direction="column">
             <Grid item md>
               <OasExplorer oas={oas} title={title} />
-            </Grid>
-            <Grid item md>
-              <OasConfigurator oas={oas} title={title} handler={this.transformHandler} />
             </Grid>
             <Grid item md>
               {puml &&

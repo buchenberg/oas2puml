@@ -1,7 +1,7 @@
 version: '2'
 services:
   har2puml:
-    image: panamax.spectrumxg.com/qis-tools/har2puml:${CI_COMMIT_SHA}
+    image: panamax.spectrumxg.com/qis-tools/oas2puml:${CI_COMMIT_SHA}
     expose:
       - 80
     labels:
