@@ -19,8 +19,7 @@ class OasConfigurator extends React.Component {
     componentWillReceiveProps(nextProps) {
         if (JSON.stringify(this.props.title) !== JSON.stringify(nextProps.title)) {
             this.setState({
-                oas: nextProps.oas,
-                selected: []
+                oas: nextProps.oas
             });
         }
     }
@@ -34,10 +33,9 @@ class OasConfigurator extends React.Component {
         }
     }
 
-    cacheSelections = selections => {
-        localStorage.setItem('paths_selected', JSON.stringify(selections));
+    cacheSelections = () => {
+        localStorage.setItem('paths_selected', JSON.stringify(this.state.selected));
     };
-
 
 
     handleCheck = (path, method) => event => {
@@ -51,14 +49,14 @@ class OasConfigurator extends React.Component {
             this.setState(prevState => ({
                 selected
             }), () => {
-                this.cacheSelections(this.state.selected);
+                this.cacheSelections();
             });
         } else {
             selected[path] = selected[path].filter(item => item !== method)
             this.setState(prevState => ({
                 selected
             }), () => {
-                this.cacheSelections(this.state.selected);
+                this.cacheSelections();
             });
         }
     };

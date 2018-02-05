@@ -12,15 +12,14 @@ class OasConfigurator extends React.Component {
         super(props);
         this.state = {
             oas: props.oas,
-            selected: [],
+            selected: {},
         };
     };
 
     componentWillReceiveProps(nextProps) {
         if (JSON.stringify(this.props.title) !== JSON.stringify(nextProps.title)) {
             this.setState({
-                oas: nextProps.oas,
-                selected: []
+                oas: nextProps.oas
             });
         }
     }

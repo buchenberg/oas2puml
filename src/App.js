@@ -40,6 +40,10 @@ const styles = {
   }
 };
 
+const verbs = [
+  "get", "post", "put", "delete"
+]
+
 class App extends React.Component {
 
   constructor(props) {
@@ -106,40 +110,72 @@ class App extends React.Component {
     return suspect1.toLowerCase().replace(/(^| )(\w)/g, s => s.toUpperCase());
   };
 
+  parseParams = params => {
+    let paramArray = [];
+    for (let index in params) {
+      let paramObj = params[index];
+      // $ref handling
+      if (paramObj.$ref) {
+        let ref = paramObj.$ref;
+        let parts = ref.split('/');
+        let lastSegment = parts.pop() || parts.pop();
+        paramArray.push(lastSegment)
+      }
+      // name
+      else if (paramObj.name) {
+        paramArray.push(paramObj.name)
+      }
+    };
+    return paramArray;
+  }
+
   pumlfy = (oas, callback) => {
-    const selected = JSON.parse(localStorage.getItem('paths_selected'));
+    //const selected = JSON.parse(localStorage.getItem('paths_selected'));
     let pumlText = '@startuml\n';
-    for (let path in selected) {
+    for (let index in oas.paths) {
       const serviceName = oas.info.title;
-      const resourceName = this.resourceFromPath(path);
-      const methods = selected[path]
-      const commonParams = oas.paths[path].parameters || null;
-      for (let index in methods) {
-        const method = methods[index]
+      const resourceName = this.resourceFromPath(index);
+      const methods = oas.paths[index]
+      // const commonParams = oas.paths[path].parameters || null;
+      verbs.map( verb => {
+        if (methods[verb]) {
+          const method = methods[verb]
+          let allParams = [];
 
         pumlText +=
           '"User Agent" -> ' + //request
           '"' + serviceName + '"' +
-          ': ' + method + resourceName.charAt(0).toUpperCase() + resourceName.slice(1) +
+          ': ' + verb + resourceName.charAt(0).toUpperCase() + resourceName.slice(1) +
           '( ';
 
-        // common path params
-        for (let index in commonParams) {
-          let paramObj = commonParams[index];
-          if (paramObj.$ref) {
-            let ref = paramObj.$ref;
-            var parts = ref.split('/');
-            var lastSegment = parts.pop() || parts.pop();
-            pumlText += lastSegment + ' ';
+        if (methods.parameters) {
+          let paramArray = this.parseParams(methods.parameters);
+          for (let param in paramArray) {
+            allParams.push(paramArray[param])
           }
-
         }
+
+        if (method.parameters) {
+          let paramArray = this.parseParams(method.parameters);
+          for (let param in paramArray) {
+            allParams.push(paramArray[param])
+          }
+        }
+
+        for (let index in allParams) {
+          if (allParams[allParams.length - 1] === allParams[index]) { //last one
+            pumlText += allParams[index];
+          } else {
+            pumlText += allParams[index] + ', ';
+          }
+        }
+
         pumlText += ' ) \n' +
           'note right: ' + //note
-          method + ' ' + path +
+          verb + ' ' + index +
           '\n';
 
-        const responses = oas.paths[path][method].responses;
+        const responses = method.responses;
         for (let key in responses) {
           pumlText +=
             '"' + serviceName + '"' + //service
@@ -151,7 +187,9 @@ class App extends React.Component {
 
         }
 
-      }
+        }
+        
+      })
 
     }
     pumlText += '@enduml';
